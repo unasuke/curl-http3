@@ -1,8 +1,8 @@
-FROM ubuntu:18.04 as base-fetch
+FROM ubuntu:20.04 as base-fetch
 RUN apt-get update && apt-get install -y git
 
-FROM ubuntu:18.04 as base-build
-RUN apt-get update && apt-get install -y build-essential pkg-config autoconf libtool
+FROM ubuntu:20.04 as base-build
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-essential pkg-config autoconf libtool tzdata
 
 FROM base-fetch as fetch-openssl
 WORKDIR /root
@@ -13,6 +13,7 @@ COPY --from=fetch-openssl /root/openssl /root/openssl
 WORKDIR /root/openssl
 RUN ./config enable-tls1_3 --prefix=/openssl
 RUN make
+RUN make -j`nproc`
 RUN make install_sw
 
 FROM base-fetch as fetch-nghttp3
@@ -25,7 +26,7 @@ COPY --from=fetch-nghttp3 /root/nghttp3 /root/nghttp3
 WORKDIR /root/nghttp3
 RUN autoreconf -i
 RUN ./configure --prefix=/nghttp3 --enable-lib-only
-RUN make
+RUN make -j`nproc`
 RUN make install
 
 FROM base-fetch as fetch-ngtcp2
@@ -44,7 +45,7 @@ RUN ./configure PKG_CONFIG_PATH=/openssl/lib/pkgconfig:/nghttp3/lib/pkgconfig \
         LDFLAGS="-Wl,-rpath,/openssl/lib" \
         --prefix=/ngtcp2 \
         --enable-lib-only
-RUN make
+RUN make -j`nproc`
 RUN make install
 
 FROM base-fetch as fetch-curl
@@ -63,10 +64,10 @@ RUN LDFLAGS="-Wl,-rpath,/openssl/lib" \
         ./configure --with-ssl=/openssl \
         --with-nghttp3=/nghttp3 \
         --with-ngtcp2=/ngtcp2
-RUN make
+RUN make -j`nproc`
 RUN make install
 
-FROM ubuntu:18.04 as executor
+FROM ubuntu:20.04 as executor
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /usr/local/bin/curl /usr/local/bin/curl
