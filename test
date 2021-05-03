@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 
-docker run -it --rm curl-http3:quiche-latest curl --http3 https://nghttp2.org:4433/
-docker run -it --rm curl-http3:ngtcp2-latest curl --http3 https://nghttp2.org:4433/
+docker run --rm curl-http3:quiche-latest curl --http3 https://nghttp2.org:4433/
+docker run --rm curl-http3:ngtcp2-latest curl --http3 https://nghttp2.org:4433/

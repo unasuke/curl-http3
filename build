@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 
 TIMESTAMP=$(date +%Y-%m-%d)
+
+if [[ $CI = "true" ]]; then
+  docker pull ghcr.io/unasuke/curl-http3:quiche-latest
+  docker pull ghcr.io/unasuke/curl-http3:ngtcp2-latest
+fi
 
 docker build -t curl-http3:quiche-$TIMESTAMP -f quiche/Dockerfile .
 docker build -t curl-http3:ngtcp2-$TIMESTAMP -f ngtcp2/Dockerfile .
