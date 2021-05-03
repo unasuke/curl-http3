@@ -91,6 +91,7 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
   build-and-test:
+    needs: [quiche, ngtcp2]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
