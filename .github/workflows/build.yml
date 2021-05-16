@@ -21,7 +21,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: crazy-max/ghaction-docker-meta@v2
+      - uses: docker/metadata-action@v3
         id: meta
         with:
           images: ghcr.io/unasuke/curl-http3
@@ -65,7 +65,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: crazy-max/ghaction-docker-meta@v2
+      - uses: docker/metadata-action@v3
         id: meta
         with:
           images: ghcr.io/unasuke/curl-http3
