@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-openssl
 WORKDIR /root
-RUN git clone --depth 1 -b OpenSSL_1_1_1g-quic-draft-29 https://github.com/tatsuhiro-t/openssl
+RUN git clone --depth 1 -b OpenSSL_1_1_1k+quic https://github.com/quictls/openssl
 
 FROM base-build as build-openssl
 COPY --from=fetch-openssl /root/openssl /root/openssl
