@@ -6,14 +6,15 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-quiche
 WORKDIR /root
-RUN git clone --recursive --depth 1 -b 0.7.0 https://github.com/cloudflare/quiche
+RUN git clone --recursive --depth 1 -b 0.9.0 https://github.com/cloudflare/quiche
 
 FROM base-build as build-quiche
 WORKDIR /root
-RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y cargo cmake tzdata
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y curl cmake tzdata \
+  && curl https://sh.rustup.rs -sSf | sh -s -- -y
 COPY --from=fetch-quiche /root/quiche /root/quiche
 WORKDIR /root/quiche/
-RUN cargo build --release --features ffi,pkg-config-meta,qlog \
+RUN ~/.cargo/bin/cargo build --release --features ffi,pkg-config-meta,qlog \
   && mkdir deps/boringssl/src/lib \
   && ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
 
