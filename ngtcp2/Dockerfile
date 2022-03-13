@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-openssl
 WORKDIR /root
-RUN git clone --depth 1 -b OpenSSL_1_1_1k+quic https://github.com/quictls/openssl
+RUN git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
 
 FROM base-build as build-openssl
 COPY --from=fetch-openssl /root/openssl /root/openssl
@@ -14,17 +14,17 @@ WORKDIR /root/openssl
 RUN ./config enable-tls1_3 --prefix=/openssl
 RUN make
 RUN make -j`nproc`
-RUN make install_sw
+RUN make install
 
 FROM base-fetch as fetch-nghttp3
 WORKDIR /root
-RUN git clone https://github.com/ngtcp2/nghttp3
+RUN git clone --depth 1 https://github.com/ngtcp2/nghttp3
 
 FROM base-build as build-nghttp3
 WORKDIR /root
 COPY --from=fetch-nghttp3 /root/nghttp3 /root/nghttp3
 WORKDIR /root/nghttp3
-RUN autoreconf -i
+RUN autoreconf -fi
 RUN ./configure --prefix=/nghttp3 --enable-lib-only
 RUN make -j`nproc`
 RUN make install
@@ -37,7 +37,7 @@ FROM base-build as build-ngtcp2
 WORKDIR /root
 COPY --from=fetch-ngtcp2 /root/ngtcp2 /root/ngtcp2
 WORKDIR /root/ngtcp2
-RUN autoreconf -i
+RUN autoreconf -fi
 COPY --from=build-openssl /openssl/ /openssl
 COPY --from=build-nghttp3 /nghttp3 /nghttp3
 RUN apt-get update && apt-get install -y libev-dev
@@ -61,7 +61,7 @@ COPY --from=build-openssl /openssl /openssl
 COPY --from=build-nghttp3 /nghttp3 /nghttp3
 COPY --from=build-ngtcp2 /ngtcp2 /ngtcp2
 RUN LDFLAGS="-Wl,-rpath,/openssl/lib" \
-        ./configure --with-ssl=/openssl \
+        ./configure --with-openssl=/openssl \
         --with-nghttp3=/nghttp3 \
         --with-ngtcp2=/ngtcp2
 RUN make -j`nproc`
