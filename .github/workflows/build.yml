@@ -27,6 +27,7 @@ jobs:
         with:
           context: quiche
           push: true
+          no-cache: true
           tags: ${{ steps.meta.outputs.tags }}
   ngtcp2:
     runs-on: ubuntu-20.04
@@ -53,6 +54,7 @@ jobs:
         with:
           context: ngtcp2
           push: true
+          no-cache: true
           tags: ${{ steps.meta.outputs.tags }}
   build-and-test:
     needs: [quiche, ngtcp2]
@@ -62,6 +64,5 @@ jobs:
       - uses: docker/setup-buildx-action@v1
       - name: build and test
         run: |
-          ./build
           ./test
 
