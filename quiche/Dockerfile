@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-quiche
 WORKDIR /root
-RUN git clone --recursive --depth 1 -b 0.9.0 https://github.com/cloudflare/quiche
+RUN git clone --recursive --depth 1 https://github.com/cloudflare/quiche
 
 FROM base-build as build-quiche
 WORKDIR /root
@@ -15,8 +15,8 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y curl c
 COPY --from=fetch-quiche /root/quiche /root/quiche
 WORKDIR /root/quiche/
 RUN ~/.cargo/bin/cargo build --release --features ffi,pkg-config-meta,qlog \
-  && mkdir deps/boringssl/src/lib \
-  && ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) deps/boringssl/src/lib/
+  && mkdir quiche/deps/boringssl/src/lib \
+  && ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
 FROM base-fetch as fetch-curl
 WORKDIR /root
@@ -29,7 +29,7 @@ WORKDIR /root/curl
 RUN ./buildconf
 COPY --from=build-quiche /root/quiche /root/quiche
 RUN ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
-        --with-openssl=$PWD/../quiche/deps/boringssl/src \
+        --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src \
         --with-quiche=$PWD/../quiche/target/release
 RUN make -j`nproc`
 RUN make install
