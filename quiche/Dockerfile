@@ -29,12 +29,14 @@ WORKDIR /root/curl
 RUN ./buildconf
 COPY --from=build-quiche /root/quiche /root/quiche
 RUN ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
-        --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src \
-        --with-quiche=$PWD/../quiche/target/release
+  --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src \
+  --with-quiche=$PWD/../quiche/target/release \
+  --with-ca-path=/etc/ssl/certs
 RUN make -j`nproc`
 RUN make install
 
 FROM ubuntu:20.04 as executor
+RUN apt update && apt install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libquiche.conf
