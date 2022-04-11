@@ -12,7 +12,6 @@ FROM base-build as build-openssl
 COPY --from=fetch-openssl /root/openssl /root/openssl
 WORKDIR /root/openssl
 RUN ./config enable-tls1_3 --prefix=/openssl
-RUN make
 RUN make -j`nproc`
 RUN make install
 
@@ -37,12 +36,12 @@ FROM base-build as build-ngtcp2
 WORKDIR /root
 COPY --from=fetch-ngtcp2 /root/ngtcp2 /root/ngtcp2
 WORKDIR /root/ngtcp2
-RUN autoreconf -fi
 COPY --from=build-openssl /openssl/ /openssl
 COPY --from=build-nghttp3 /nghttp3 /nghttp3
 RUN apt-get update && apt-get install -y libev-dev
-RUN ./configure PKG_CONFIG_PATH=/openssl/lib/pkgconfig:/nghttp3/lib/pkgconfig \
-        LDFLAGS="-Wl,-rpath,/openssl/lib" \
+RUN autoreconf -fi
+RUN ./configure PKG_CONFIG_PATH=/openssl/lib64/pkgconfig:/nghttp3/lib/pkgconfig \
+        LDFLAGS="-Wl,-rpath,/openssl/lib64" \
         --prefix=/ngtcp2 \
         --enable-lib-only
 RUN make -j`nproc`
@@ -56,24 +55,26 @@ FROM base-build as build-curl
 RUN apt-get update && apt-get install -y libtool
 COPY --from=fetch-curl /root/curl /root/curl
 WORKDIR /root/curl
-RUN ./buildconf
 COPY --from=build-openssl /openssl /openssl
 COPY --from=build-nghttp3 /nghttp3 /nghttp3
 COPY --from=build-ngtcp2 /ngtcp2 /ngtcp2
-RUN LDFLAGS="-Wl,-rpath,/openssl/lib" \
+RUN autoreconf -fi
+RUN LDFLAGS="-Wl,-rpath,/openssl/lib64" \
         ./configure --with-openssl=/openssl \
         --with-nghttp3=/nghttp3 \
-        --with-ngtcp2=/ngtcp2
+        --with-ngtcp2=/ngtcp2 \
+        --with-ca-path=/etc/ssl/certs
 RUN make -j`nproc`
 RUN make install
 
 FROM ubuntu:20.04 as executor
+RUN apt update && apt install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /usr/local/bin/curl /usr/local/bin/curl
-COPY --from=build-curl /openssl/lib/ /openssl/lib/
-COPY --from=build-curl /nghttp3/lib/libnghttp3.so.0 /nghttp3/lib/libnghttp3.so.0
-COPY --from=build-curl /ngtcp2/lib/libngtcp2.so.0 /ngtcp2/lib/libngtcp2.so.0
-COPY --from=build-curl /ngtcp2/lib/libngtcp2_crypto_openssl.so.0 /ngtcp2/lib/libngtcp2_crypto_openssl.so.0
+COPY --from=build-curl /openssl/lib64/ /openssl/lib64/
+COPY --from=build-curl /nghttp3/lib/libnghttp3.so.1 /nghttp3/lib/libnghttp3.so.1
+COPY --from=build-curl /ngtcp2/lib/libngtcp2.so.2 /ngtcp2/lib/libngtcp2.so.2
+COPY --from=build-curl /ngtcp2/lib/libngtcp2_crypto_openssl.so.1 /ngtcp2/lib/libngtcp2_crypto_openssl.so.1
 RUN ldconfig
 CMD ["bash"]
