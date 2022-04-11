@@ -5,5 +5,5 @@ set -eux
 docker pull ghcr.io/unasuke/curl-http3:quiche-latest
 docker pull ghcr.io/unasuke/curl-http3:ngtcp2-latest
 
-docker run --rm ghcr.io/unasuke/curl-http3:curl-http3:quiche-latest curl --http3 https://nghttp2.org:4433/
-docker run --rm ghcr.io/unasuke/curl-http3:curl-http3:ngtcp2-latest curl --http3 https://nghttp2.org:4433/
+docker run --rm ghcr.io/unasuke/curl-http3:quiche-latest /usr/local/bin/curl --http3 https://nghttp2.org:4433/
+docker run --rm ghcr.io/unasuke/curl-http3:ngtcp2-latest /usr/local/bin/curl --http3 https://nghttp2.org:4433/
