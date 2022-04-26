@@ -1,7 +1,7 @@
-FROM ubuntu:20.04 as base-fetch
+FROM ubuntu:22.04 as base-fetch
 RUN apt-get update && apt-get install -y git
 
-FROM ubuntu:20.04 as base-build
+FROM ubuntu:22.04 as base-build
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-essential pkg-config autoconf libtool tzdata
 
 FROM base-fetch as fetch-openssl
@@ -67,7 +67,7 @@ RUN LDFLAGS="-Wl,-rpath,/openssl/lib64" \
 RUN make -j`nproc`
 RUN make install
 
-FROM ubuntu:20.04 as executor
+FROM ubuntu:22.04 as executor
 RUN apt update && apt install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
