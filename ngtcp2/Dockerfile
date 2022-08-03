@@ -74,7 +74,7 @@ COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /usr/local/bin/curl /usr/local/bin/curl
 COPY --from=build-curl /openssl/lib64/ /openssl/lib64/
 COPY --from=build-curl /nghttp3/lib/libnghttp3.so.2 /nghttp3/lib/libnghttp3.so.2
-COPY --from=build-curl /ngtcp2/lib/libngtcp2.so.3 /ngtcp2/lib/libngtcp2.so.3
+COPY --from=build-curl /ngtcp2/lib/libngtcp2.so.6 /ngtcp2/lib/libngtcp2.so.6
 COPY --from=build-curl /ngtcp2/lib/libngtcp2_crypto_openssl.so.2 /ngtcp2/lib/libngtcp2_crypto_openssl.so.2
 RUN ldconfig
 CMD ["bash"]
