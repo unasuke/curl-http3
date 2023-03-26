@@ -1,4 +1,4 @@
-name: build msh3
+name: msh3
 on:
   push:
     branches: "*"

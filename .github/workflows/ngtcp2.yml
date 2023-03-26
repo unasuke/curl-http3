@@ -1,4 +1,4 @@
-name: build ngtcp2
+name: ngtcp2
 on:
   push:
     branches: "*"
