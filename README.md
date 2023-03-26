@@ -1,5 +1,7 @@
 # curl with HTTP/3
-[![.github/workflows/build.yml](https://github.com/unasuke/curl-http3/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/unasuke/curl-http3/actions/workflows/build.yml)
+[![quiche](https://github.com/unasuke/curl-http3/actions/workflows/quiche.yml/badge.svg)](https://github.com/unasuke/curl-http3/actions/workflows/quiche.yml)
+[![ngtcp2](https://github.com/unasuke/curl-http3/actions/workflows/ngtcp2.yml/badge.svg)](https://github.com/unasuke/curl-http3/actions/workflows/ngtcp2.yml)
+[![msh3](https://github.com/unasuke/curl-http3/actions/workflows/msh3.yml/badge.svg)](https://github.com/unasuke/curl-http3/actions/workflows/msh3.yml)
 
 ## How to use
 
