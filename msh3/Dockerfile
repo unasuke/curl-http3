@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-msh3
 WORKDIR /root
-RUN git clone --recursive --depth 1 -b v0.5.0 https://github.com/nibanks/msh3
+RUN git clone --recursive --depth 1 -b v0.6.0 https://github.com/nibanks/msh3
 
 FROM base-build as build-msh3
 WORKDIR /root
