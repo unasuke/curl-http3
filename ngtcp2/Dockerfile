@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-openssl
 WORKDIR /root
-RUN git clone --depth 1 -b openssl-3.0.0+quic https://github.com/quictls/openssl
+RUN git clone --depth 1 -b openssl-3.0.10+quic https://github.com/quictls/openssl
 
 FROM base-build as build-openssl
 COPY --from=fetch-openssl /root/openssl /root/openssl
@@ -17,7 +17,7 @@ RUN make install
 
 FROM base-fetch as fetch-nghttp3
 WORKDIR /root
-RUN git clone --depth 1 https://github.com/ngtcp2/nghttp3
+RUN git clone --depth 1 -b v0.15.0 https://github.com/ngtcp2/nghttp3
 
 FROM base-build as build-nghttp3
 WORKDIR /root
@@ -30,7 +30,7 @@ RUN make install
 
 FROM base-fetch as fetch-ngtcp2
 WORKDIR /root
-RUN git clone https://github.com/ngtcp2/ngtcp2
+RUN git clone --depth 1 -b v0.19.1 https://github.com/ngtcp2/ngtcp2
 
 FROM base-build as build-ngtcp2
 WORKDIR /root
@@ -73,8 +73,8 @@ COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.con
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /usr/local/bin/curl /usr/local/bin/curl
 COPY --from=build-curl /openssl/lib64/ /openssl/lib64/
-COPY --from=build-curl /nghttp3/lib/libnghttp3.so.3 /nghttp3/lib/libnghttp3.so.3
-COPY --from=build-curl /ngtcp2/lib/libngtcp2.so.10 /ngtcp2/lib/libngtcp2.so.10
-COPY --from=build-curl /ngtcp2/lib/libngtcp2_crypto_openssl.so.4 /ngtcp2/lib/libngtcp2_crypto_openssl.so.4
+COPY --from=build-curl /nghttp3/lib/libnghttp3.so.9 /nghttp3/lib/libnghttp3.so.9
+COPY --from=build-curl /ngtcp2/lib/libngtcp2.so.15 /ngtcp2/lib/libngtcp2.so.15
+COPY --from=build-curl /ngtcp2/lib/libngtcp2_crypto_quictls.so.1 /ngtcp2/lib/libngtcp2_crypto_quictls.so.1
 RUN ldconfig
 CMD ["bash"]
