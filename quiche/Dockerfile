@@ -26,7 +26,7 @@ FROM base-build as build-curl
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y autoconf libtool
 COPY --from=fetch-curl /root/curl /root/curl
 WORKDIR /root/curl
-RUN ./buildconf
+RUN autoreconf -fi
 COPY --from=build-quiche /root/quiche /root/quiche
 RUN ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
   --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src \
