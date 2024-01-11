@@ -21,7 +21,7 @@ WORKDIR /root
 RUN git clone --depth 1 https://github.com/curl/curl
 
 FROM base-build as build-curl
-RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y autoconf libtool libssl-dev
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y autoconf libtool libssl-dev libpsl-dev
 COPY --from=build-msh3 /usr/local /usr/local
 COPY --from=fetch-curl /root/curl /root/curl
 WORKDIR /root/curl
@@ -31,7 +31,7 @@ RUN make -j`nproc`
 RUN make install
 
 FROM ubuntu:22.04 as executor
-RUN apt update && apt install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y --no-install-recommends ca-certificates libpsl5 && rm -rf /var/lib/apt/lists/*
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /usr/local/lib/libmsh3.so /usr/local/lib/libmsh3.so

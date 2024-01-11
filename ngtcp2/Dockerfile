@@ -52,7 +52,7 @@ WORKDIR /root
 RUN git clone --depth 1 https://github.com/curl/curl
 
 FROM base-build as build-curl
-RUN apt-get update && apt-get install -y libtool
+RUN apt-get update && apt-get install -y libtool libpsl-dev
 COPY --from=fetch-curl /root/curl /root/curl
 WORKDIR /root/curl
 COPY --from=build-openssl /openssl /openssl
@@ -68,7 +68,7 @@ RUN make -j`nproc`
 RUN make install
 
 FROM ubuntu:22.04 as executor
-RUN apt update && apt install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y --no-install-recommends ca-certificates libpsl5 && rm -rf /var/lib/apt/lists/*
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
 COPY --from=build-curl /usr/local/bin/curl /usr/local/bin/curl
