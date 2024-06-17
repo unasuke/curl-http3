@@ -29,7 +29,7 @@ jobs:
             type=raw,value=ngtcp2-latest
             type=sha,prefix=ngtcp2-
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ngtcp2
           push: true
