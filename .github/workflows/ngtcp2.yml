@@ -37,7 +37,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
   build-and-test:
     needs: [ngtcp2]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
