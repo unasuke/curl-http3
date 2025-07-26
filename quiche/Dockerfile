@@ -15,6 +15,7 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y curl c
 COPY --from=fetch-quiche /root/quiche /root/quiche
 WORKDIR /root/quiche/
 RUN ~/.cargo/bin/cargo build --release --features ffi,pkg-config-meta,qlog \
+  && ln -s libquiche.so target/release/libquiche.so.0 \
   && mkdir quiche/deps/boringssl/src/lib \
   && ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
