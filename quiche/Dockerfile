@@ -6,11 +6,11 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-
 
 FROM base-fetch as fetch-quiche
 WORKDIR /root
-RUN git clone --recursive --depth 1 https://github.com/cloudflare/quiche
+RUN git clone --recursive --depth 1 --shallow-submodules https://github.com/cloudflare/quiche
 
 FROM base-build as build-quiche
 WORKDIR /root
-RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y curl cmake tzdata \
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y curl cmake git libclang-dev libfontconfig-dev tzdata \
   && curl https://sh.rustup.rs -sSf | sh -s -- -y
 COPY --from=fetch-quiche /root/quiche /root/quiche
 WORKDIR /root/quiche/
