@@ -14,10 +14,11 @@ RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y curl c
   && curl https://sh.rustup.rs -sSf | sh -s -- -y
 COPY --from=fetch-quiche /root/quiche /root/quiche
 WORKDIR /root/quiche/
-RUN ~/.cargo/bin/cargo build --release --features ffi,pkg-config-meta,qlog \
+RUN ~/.cargo/bin/cargo build --package quiche --release --features ffi,pkg-config-meta,qlog \
   && ln -s libquiche.so target/release/libquiche.so.0 \
-  && mkdir quiche/deps/boringssl/src/lib \
-  && ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+  && mkdir -p boringssl/lib \
+  && find target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' boringssl/lib \; \
+  && find target/release/build/boring-sys-*/out/boringssl -maxdepth 1 -name include -exec ln -vsf -- '../{}' boringssl \;
 
 FROM base-fetch as fetch-curl
 WORKDIR /root
@@ -29,8 +30,8 @@ COPY --from=fetch-curl /root/curl /root/curl
 WORKDIR /root/curl
 RUN autoreconf -fi
 COPY --from=build-quiche /root/quiche /root/quiche
-RUN ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
-  --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src \
+RUN ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" LIBS="-lstdc++" \
+  --with-openssl=$PWD/../quiche/boringssl \
   --with-quiche=$PWD/../quiche/target/release \
   --with-ca-path=/etc/ssl/certs
 RUN make -j`nproc`
