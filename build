@@ -6,8 +6,6 @@ TIMESTAMP=$(date +%Y-%m-%d)
 
 docker build -t curl-http3:quiche-$TIMESTAMP -f quiche/Dockerfile --no-cache .
 docker build -t curl-http3:ngtcp2-$TIMESTAMP -f ngtcp2/Dockerfile --no-cache .
-docker build -t curl-http3:msh3-$TIMESTAMP -f msh3/Dockerfile --no-cache .
 
 docker tag curl-http3:quiche-$TIMESTAMP curl-http3:quiche-latest
 docker tag curl-http3:ngtcp2-$TIMESTAMP curl-http3:ngtcp2-latest
-docker tag curl-http3:msh3-$TIMESTAMP curl-http3:msh3-latest
