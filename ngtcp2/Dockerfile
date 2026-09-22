@@ -1,25 +1,25 @@
-FROM ubuntu:26.04 as base-fetch
+FROM ubuntu:26.04 AS base-fetch
 RUN apt-get update && apt-get install -y git
 
-FROM ubuntu:26.04 as base-build
+FROM ubuntu:26.04 AS base-build
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y build-essential pkg-config autoconf libtool tzdata
 
-FROM base-fetch as fetch-openssl
+FROM base-fetch AS fetch-openssl
 WORKDIR /root
 RUN git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
 
-FROM base-build as build-openssl
+FROM base-build AS build-openssl
 COPY --from=fetch-openssl /root/openssl /root/openssl
 WORKDIR /root/openssl
 RUN ./config enable-tls1_3 --prefix=/openssl
 RUN make -j`nproc`
 RUN make install
 
-FROM base-fetch as fetch-nghttp3
+FROM base-fetch AS fetch-nghttp3
 WORKDIR /root
 RUN git clone --depth 1 -b v1.1.0 https://github.com/ngtcp2/nghttp3
 
-FROM base-build as build-nghttp3
+FROM base-build AS build-nghttp3
 WORKDIR /root
 COPY --from=fetch-nghttp3 /root/nghttp3 /root/nghttp3
 WORKDIR /root/nghttp3
@@ -28,11 +28,11 @@ RUN ./configure --prefix=/nghttp3 --enable-lib-only
 RUN make -j`nproc`
 RUN make install
 
-FROM base-fetch as fetch-ngtcp2
+FROM base-fetch AS fetch-ngtcp2
 WORKDIR /root
 RUN git clone --depth 1 -b v1.1.0 https://github.com/ngtcp2/ngtcp2
 
-FROM base-build as build-ngtcp2
+FROM base-build AS build-ngtcp2
 WORKDIR /root
 COPY --from=fetch-ngtcp2 /root/ngtcp2 /root/ngtcp2
 WORKDIR /root/ngtcp2
@@ -47,11 +47,11 @@ RUN ./configure PKG_CONFIG_PATH=/openssl/lib64/pkgconfig:/nghttp3/lib/pkgconfig 
 RUN make -j`nproc`
 RUN make install
 
-FROM base-fetch as fetch-curl
+FROM base-fetch AS fetch-curl
 WORKDIR /root
 RUN git clone --depth 1 https://github.com/curl/curl
 
-FROM base-build as build-curl
+FROM base-build AS build-curl
 RUN apt-get update && apt-get install -y libtool libpsl-dev
 COPY --from=fetch-curl /root/curl /root/curl
 WORKDIR /root/curl
@@ -67,7 +67,7 @@ RUN LDFLAGS="-Wl,-rpath,/openssl/lib64" \
 RUN make -j`nproc`
 RUN make install
 
-FROM ubuntu:26.04 as executor
+FROM ubuntu:26.04 AS executor
 RUN apt update && apt install -y --no-install-recommends ca-certificates libpsl5 && rm -rf /var/lib/apt/lists/*
 COPY --from=build-curl /etc/ld.so.conf.d/libc.conf /etc/ld.so.conf.d/libcurl.conf
 COPY --from=build-curl /usr/local/lib/libcurl.so.4 /usr/local/lib/libcurl.so.4
